@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="مشروع الأمان الوطني — عرض تقديمي تفاعلي">
+<meta name="theme-color" content="#0b1220">
+<title>مشروع الأمان الوطني</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@300;400;500&display=swap">
+<style>
+/* Layout: one full-screen "scene" per slide, vertical scroll-snap, RTL. Photo left, text right, as in the deck. */
+:root{
+  --ink:#0b1220;          /* night sky over the parade ground */
+  --ink-2:#121c2e;
+  --fg:#f4f6fb;
+  --fg-dim:rgba(244,246,251,.72);
+  --accent:#c8102e;       /* Omani red */
+  --accent-2:#e2b45a;     /* brass / insignia gold */
+  --line:rgba(244,246,251,.18);
+  --glass:rgba(11,18,32,.42);
+  --font-display:"Amiri","Noto Naskh Arabic",serif;
+  --font-body:"Noto Naskh Arabic","Amiri",serif;
+  --font-ui:"IBM Plex Sans Arabic","Noto Naskh Arabic",system-ui,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--ink);color:var(--fg);font-family:var(--font-body);direction:rtl;overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent-2);outline-offset:3px}
+
+/* ---------- deck ---------- */
+#deck{height:100%;overflow-y:auto;scroll-snap-type:y mandatory;scroll-behavior:smooth;scrollbar-width:none}
+#deck::-webkit-scrollbar{display:none}
+.scene{position:relative;height:100%;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden;isolation:isolate}
+.scene .bg{position:absolute;inset:-4%;background:url(assets/bg.jpg) center/cover no-repeat;z-index:-3;transform:scale(1);will-change:transform;filter:saturate(.9)}
+.scene[data-n="1"] .bg{background-position:center}
+.scene:not([data-n="1"]) .bg{background-size:126% auto;background-position:0% 42%}
+.scene .shade{position:absolute;inset:0;z-index:-2;
+  background:linear-gradient(270deg,rgba(11,18,32,.88) 0%,rgba(11,18,32,.72) 42%,rgba(11,18,32,.25) 68%,rgba(11,18,32,.15) 100%)}
+.scene[data-n="1"] .shade{background:radial-gradient(circle at 24% 50%,rgba(11,18,32,.62) 0%,rgba(11,18,32,.35) 18%,transparent 34%),linear-gradient(270deg,rgba(11,18,32,.55) 0%,rgba(11,18,32,.2) 45%,rgba(11,18,32,.05) 100%)}
+@media (max-width:640px){.scene[data-n="1"] .shade{background:radial-gradient(circle at 50% 30%,rgba(11,18,32,.6) 0%,transparent 40%),linear-gradient(0deg,rgba(11,18,32,.9) 0%,rgba(11,18,32,.5) 60%,rgba(11,18,32,.2) 100%)}}
+.scene .grid{position:absolute;inset:0;z-index:-1;opacity:.14;pointer-events:none;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:64px 64px;mask-image:linear-gradient(270deg,#000 0%,transparent 70%);-webkit-mask-image:linear-gradient(270deg,#000 0%,transparent 70%)}
+.scene canvas.net{position:absolute;inset:0;width:100%;height:100%;z-index:-1;opacity:.55;pointer-events:none}
+.scene .sweep{position:absolute;top:-30%;bottom:-30%;width:22vw;z-index:-1;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.10),transparent);transform:rotate(14deg);right:-30vw;opacity:0}
+.scene.active .sweep{animation:sweep 9s linear 1.2s infinite}
+.scene.active .bg{animation:kenburns 26s ease-out forwards}
+@keyframes kenburns{from{transform:scale(1)}to{transform:scale(1.07)}}
+@keyframes sweep{from{right:-30vw}to{right:130vw}}
+
+/* ---------- content ---------- */
+.wrap{position:relative;height:100%;display:grid;grid-template-columns:minmax(0,1fr);align-content:center;
+  padding-inline:clamp(20px,6vw,96px);padding-block:clamp(72px,10vh,120px);max-width:1400px;margin-inline:auto}
+.panel{max-width:min(46ch,100%);justify-self:start}
+.eyebrow{font-family:var(--font-ui);font-size:.78rem;letter-spacing:.14em;color:var(--accent-2);display:flex;align-items:center;gap:.7em;margin-bottom:1.1rem;font-variant-numeric:tabular-nums}
+.eyebrow::before{content:"";width:2.4rem;height:1px;background:var(--accent-2);opacity:.8}
+h1,h2{font-family:var(--font-display);font-weight:700;margin:0;text-wrap:balance;line-height:1.28}
+h2{font-size:clamp(1.55rem,3.4vw,2.6rem);margin-bottom:1.1rem;position:relative;padding-bottom:.55rem}
+h2::after{content:"";position:absolute;right:0;bottom:0;height:3px;width:0;background:var(--accent);transition:width 1.1s cubic-bezier(.2,.7,.2,1) .35s}
+.scene.active h2::after{width:4.5rem}
+.lead{font-size:clamp(1.05rem,1.55vw,1.32rem);line-height:2;color:var(--fg);margin:0 0 .9rem}
+.items{list-style:none;margin:0;padding:0;display:grid;gap:.55rem}
+.items li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.8rem;align-items:start;font-size:clamp(1rem,1.35vw,1.22rem);line-height:1.85}
+.items li .tick{margin-top:.9em;width:.55rem;height:.55rem;border-radius:50%;background:var(--accent);box-shadow:0 0 0 4px rgba(200,16,46,.18);flex:none}
+.items li.sys .tick{border-radius:2px;background:var(--accent-2);box-shadow:0 0 0 4px rgba(226,180,90,.16)}
+.items.compact li{font-size:clamp(.95rem,1.2vw,1.1rem);line-height:1.7;gap:.65rem}
+.items.compact{gap:.35rem}
+
+/* reveal choreography: JS adds .armed to hide, .active to play */
+.armed .rv{opacity:0;transform:translateX(-22px)}
+.armed.active .rv{animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+
+/* ---------- hero ---------- */
+.hero .wrap{align-content:center;justify-items:center;text-align:center}
+.hero h1{font-size:clamp(2.6rem,7.5vw,6.2rem);letter-spacing:-.01em;line-height:1.2}
+.hero .sub{font-family:var(--font-ui);font-weight:300;font-size:clamp(.95rem,1.6vw,1.25rem);color:var(--fg-dim);margin-top:1.2rem;letter-spacing:.06em}
+.hero .rule{width:9rem;height:2px;background:linear-gradient(90deg,transparent,var(--accent-2),transparent);margin:1.6rem auto}
+.start{margin-top:1.6rem;font-family:var(--font-ui);font-weight:500;font-size:1.05rem;padding:.9rem 2.2rem;border:1px solid rgba(244,246,251,.45);border-radius:999px;
+  background:rgba(11,18,32,.45);backdrop-filter:blur(8px);display:inline-flex;align-items:center;gap:.7rem;transition:background .3s,border-color .3s,transform .3s}
+.start:hover{background:var(--accent);border-color:var(--accent);transform:translateY(-1px)}
+.start .dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--accent);animation:pulse 1.6s ease-in-out infinite}
+.start:hover .dot{background:#fff}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(200,16,46,.6)}70%{box-shadow:0 0 0 10px rgba(200,16,46,0)}}
+.hero .hint{font-family:var(--font-ui);font-size:.8rem;color:var(--fg-dim);margin-top:1rem}
+
+/* ---------- closing ---------- */
+.closing .wrap{justify-items:center;text-align:center}
+.closing .dua{font-family:var(--font-display);font-size:clamp(1.5rem,3.6vw,2.7rem);line-height:1.8;max-width:26ch}
+.closing .by{font-family:var(--font-ui);font-weight:300;font-size:clamp(1rem,1.6vw,1.25rem);color:var(--fg-dim);margin-top:2rem;letter-spacing:.04em}
+.closing .by strong{font-weight:500;color:var(--fg)}
+.closing .seal{width:5.5rem;height:5.5rem;border-radius:50%;border:1px solid var(--accent-2);display:grid;place-items:center;margin-bottom:1.6rem;position:relative}
+.closing .seal::after{content:"";position:absolute;inset:6px;border-radius:50%;border:1px dashed rgba(226,180,90,.5)}
+.closing .seal svg{width:2.4rem;height:2.4rem}
+
+/* ---------- ops strip (top) ---------- */
+#ops{position:fixed;top:0;right:0;left:0;z-index:20;padding:calc(10px + env(safe-area-inset-top,0px)) clamp(16px,3vw,32px) 10px;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem;font-family:var(--font-ui);font-size:.74rem;letter-spacing:.08em;color:var(--fg-dim);
+  background:linear-gradient(180deg,rgba(11,18,32,.75),transparent);pointer-events:none;font-variant-numeric:tabular-nums}
+#ops .live{display:flex;align-items:center;gap:.55rem}
+#ops .live i{width:.5rem;height:.5rem;border-radius:50%;background:#37d67a;box-shadow:0 0 0 0 rgba(55,214,122,.6);animation:pulse-g 2s infinite}
+@keyframes pulse-g{70%{box-shadow:0 0 0 8px rgba(55,214,122,0)}100%{box-shadow:0 0 0 0 rgba(55,214,122,0)}}
+#ops .clock{direction:ltr}
+#progress{position:fixed;top:0;right:0;height:3px;width:0;background:var(--accent);z-index:21;transition:width .5s ease}
+
+/* ---------- controls (bottom) ---------- */
+#bar{position:fixed;bottom:0;right:0;left:0;z-index:20;padding:12px clamp(16px,3vw,32px) calc(12px + env(safe-area-inset-bottom,0px));
+  display:flex;align-items:center;justify-content:space-between;gap:.8rem;font-family:var(--font-ui);
+  background:linear-gradient(0deg,rgba(11,18,32,.85),transparent)}
+#bar .group{display:flex;align-items:center;gap:.4rem}
+.ctl{width:2.6rem;height:2.6rem;border-radius:50%;border:1px solid var(--line);background:var(--glass);backdrop-filter:blur(8px);display:grid;place-items:center;transition:background .25s,border-color .25s}
+.ctl:hover{border-color:var(--fg-dim)}
+.ctl svg{width:1.1rem;height:1.1rem;fill:currentColor}
+.ctl[aria-pressed="true"]{background:var(--accent);border-color:var(--accent)}
+.counter{font-size:.85rem;color:var(--fg-dim);font-variant-numeric:tabular-nums;min-width:4.5rem;text-align:center}
+.counter b{color:var(--fg);font-weight:500}
+#auto{font-size:.78rem;padding:0 .9rem;width:auto;border-radius:999px;gap:.4rem;height:2.2rem;white-space:nowrap}
+#auto[aria-pressed="true"]{background:rgba(200,16,46,.9)}
+
+/* ---------- dots (side) ---------- */
+#dots{position:fixed;left:clamp(10px,2vw,22px);top:50%;transform:translateY(-50%);z-index:20;display:grid;gap:.55rem}
+#dots button{width:.55rem;height:.55rem;border-radius:50%;background:rgba(244,246,251,.35);padding:0;transition:transform .3s,background .3s}
+#dots button[aria-current="true"]{background:var(--accent-2);transform:scale(1.5)}
+
+/* ---------- misc ---------- */
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:640px){
+  .items li{font-size:1rem;line-height:1.7}
+  #dots{display:none}
+  #ops .clock{display:none}
+  .scene:not([data-n="1"]) .bg{background-size:auto 118%;background-position:18% 0%}
+  .scene .shade{background:linear-gradient(0deg,rgba(11,18,32,.92) 0%,rgba(11,18,32,.78) 55%,rgba(11,18,32,.35) 100%)}
+  .wrap{align-content:end;padding-block:80px 96px;overflow-y:auto;scrollbar-width:none}
+  .wrap .panel{max-width:100%}
+  .hero .wrap,.closing .wrap{align-content:center}
+}
+@media (prefers-reduced-motion:reduce){
+  .scene.active .bg,.scene.active .sweep,.start .dot,#ops .live i{animation:none}
+  .armed .rv{opacity:1;transform:none}
+  #deck{scroll-behavior:auto}
+}
+.scene canvas.fx3d{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+@media (prefers-reduced-motion:reduce){.scene canvas.fx3d{opacity:.6}}
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<header id="ops">
+  <div class="live"><i></i><span>مركز العمليات · منظومة التكامل الأمني الوطني</span></div>
+  <div class="clock" id="clock">--:--:-- GST</div>
+</header>
+
+<main id="deck" tabindex="0" aria-label="عرض مشروع الأمان الوطني"></main>
+
+<nav id="dots" aria-label="الانتقال بين الشرائح"></nav>
+
+<footer id="bar">
+  <div class="group">
+    <button class="ctl" id="prev" title="الشريحة السابقة" aria-label="الشريحة السابقة"><svg viewBox="0 0 24 24"><path d="M8 4l8 8-8 8V4z"/></svg></button>
+    <span class="counter"><b id="cur">١</b> / <span id="tot">١١</span></span>
+    <button class="ctl" id="next" title="الشريحة التالية" aria-label="الشريحة التالية"><svg viewBox="0 0 24 24"><path d="M16 4l-8 8 8 8V4z"/></svg></button>
+  </div>
+  <div class="group">
+    <button class="ctl" id="auto" aria-pressed="false" title="التقدم التلقائي بعد انتهاء التعليق الصوتي">▶ تشغيل تلقائي</button>
+    <button class="ctl" id="sound" aria-pressed="false" title="التعليق الصوتي" aria-label="التعليق الصوتي">
+      <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0014 8v8a4.5 4.5 0 002.5-4zM14 3.2v2.1a7 7 0 010 13.4v2.1a9 9 0 000-17.6z"/></svg>
+    </button>
+    <button class="ctl" id="full" title="ملء الشاشة" aria-label="ملء الشاشة"><svg viewBox="0 0 24 24"><path d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"/></svg></button>
+  </div>
+</footer>
+
+<script>
+/* ---------- content: exactly the deck's text, in the deck's order ---------- */
+const SLIDES = [
+ {kind:"hero", title:"مشروع الأمان الوطني"},
+ {kind:"lead", lead:"يسهم هذا المشروع في دعم التحول الرقمي في القطاع الأمني وتحقيق التكامل المعلوماتي بين مختلف الأجهزة بما يعزز من حماية الأمن الوطني وتحسين جودة الخدمات الأمنية المقدمة للمجتمع."},
+ {kind:"list", eyebrow:"٠١", title:"نبذة عن المشروع",
+  lead:"يهدف هذا المشروع إلى تعزيز مستوى التنسيق والتكامل بين الجهات الأمنية من خلال إنشاء منظومة تقنية موحدة وآمنة لتبادل المعلومات والبيانات بشكل فوري ودقيق.",
+  items:["يسعى المشروع إلى رفع كفاءة الاستجابة الأمنية.","تسريع عمليات اتخاذ القرار.","الحد من الازدواجية في الإجراءات.","اعتماد بنية تحتية رقمية متطورة تعتمد على أحداث ومعايير الأمن السيبراني."]},
+ {kind:"list", eyebrow:"٠٢", title:"الأهداف الاستراتيجية للمشروع",
+  items:["توحيد قواعد البيانات الأمنية على مستوى الدولة.","رفع كفاءة التنسيق والتعاون بين الأجهزة الأمنية.","تعزيز الأمن السيبراني وحماية البيانات الحساسة.","تحسين سرعة ودقة القرار الأمني.","استخدام تقنيات الذكاء الاصطناعي والتحليلات التنبؤية في مكافحة الجريمة والإرهاب.","بناء شراكات وطنية ودولية لتبادل المعلومات الأمنية ضمن أطر قانونية آمنة."]},
+ {kind:"list", eyebrow:"٠٣", title:"نطاق المشروع", sys:true,
+  lead:"ربط قواعد البيانات للجهات التالية: جميع الأنظمة الحكومية ومن ضمنها الأمنية.",
+  items:["الأنظمة الأمنية.","أنظمة شرطة عمان السلطانية.","أنظمة وزارة الدفاع (البرية – البحرية – الجوية).","نظام وزارة الإسكان العماني.","نظام وزارة البلديات.","نظام وزارة الصحة.","نظام وزارة الزراعة و الثروة السمكية."]},
+ {kind:"list", eyebrow:"٠٣ · تابع", title:"نطاق المشروع", sys:true,
+  items:["نظام وزارة النقل والاتصالات، والشركات الاتصالات.","أنظمة الأمن البحري.","نظام وزارة القوى العاملة.","نظام الحركة الجوية المدنية والمطارات و الشركات الطيران.","نظام لحركة السفن من الموانئ الدولة.","الأنظمة الخاصة للجهات الأمنية والتي تتابع التهديدات الأمن السيبراني.","نظام وزارة الكهرباء والمياه و الشركات المقدمة الخدمات للمواطنين و المقيمين."]},
+ {kind:"list", eyebrow:"٠٤", compact:true,
+  lead:"عند وقوع حدث أمني خطير (مثل هجوم أو انفجار أو اشتباه إرهابي) يجب أن يتوفر لدى رجال الأمن مجموعة من المعلومات الأساسية والدقيقة.",
+  items:["نوع الحدث الأمني.","مكان الحدث بدقة.","توقيت الحدث.","الجهة المبلغة أو مصدر البلاغ.","هوية المشتبه بهم إن وجدت.","الشهود والمواطنين المتواجدين في موقع الحدث.","مسارات الإخلاء والإمداد.","تحديد المواقع من خلال الإحداثيات.","الحصول على المعلومات من خلال القواعد البيانات للأنظمة المذكورة مسبقا."]},
+ {kind:"list", eyebrow:"٠٥", title:"المهام و الأولويات للمشروع", compact:true,
+  items:["يقوم بمراقبة للمواقع التي تغطيها الكاميرات التلفزيونية (الشعاع) والأجهزة اللاسلكية.","يقوم بمراقبة أجهزة الإنذار المربوطة بغرفة العمليات.","يتلقى البلاغات واتخاذ الإجراءات اللازمة.","يغطي الاتصالات السلكية واللاسلكية.","يقوم بمراقبة الكاميرات باستخدام (الدرون).","مراقبة التهديدات الأمن السيبراني على أنظمة الدولة.","مراقبة السواحل من خلال الأنظمة المتاحة (الدرون).","متابعة الأشخاص المحكوم عليهم في القضايا العنف (الأسري).","استخراج البيانات الأشخاص من خلال استخدام القواعد البيانات أنظمة المتاحة بالدولة أنظمة (شرطة عمان السلطانية)."]},
+ {kind:"list", eyebrow:"٠٦", title:"مؤشرات الأداء",
+  items:["نسبة تكامل البيانات بين الجهات.","سرعة تبادل المعلومات الأمنية.","انخفاض زمن الاستجابة للحوادث.","مستوى الأمان السيبراني (عدد الثغرات المكتشفة والمغلقة)."]},
+ {kind:"list", eyebrow:"٠٧", title:"النتائج المتوقعة من هذا المشروع",
+  items:["وجود قاعدة بيانات أمنية وطنية موحدة.","تحسين الكفاءة التشغيلية للأجهزة الأمنية.","تعزيز الجاهزية الميدانية والاستخباراتية.","بناء ثقة المواطن في المنظومة الأمنية الرقمية.","دعم الأمن الوطني والاستقرار الداخلي بشكل مستدام."]},
+ {kind:"closing", dua:"نسأل الله أن يجعل هذا الجهد نافعاً وأن يوفقنا جميعاً لمزيد من النجاح والتقدم", by:"إعداد المقدم / عاكف بن محسن البلوشي"}
+];
+const AR = n => String(n).replace(/\d/g, d => "٠١٢٣٤٥٦٧٨٩"[d]);
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+/* ---------- build ---------- */
+const deck = document.getElementById("deck");
+const dots = document.getElementById("dots");
+SLIDES.forEach((s, i) => {
+  const n = i + 1;
+  const sec = document.createElement("section");
+  sec.className = "scene " + (s.kind === "hero" ? "hero" : s.kind === "closing" ? "closing" : "");
+  sec.dataset.n = n; sec.id = "s" + n;
+  let inner = "";
+  if (s.kind === "hero") {
+    inner = `<div class="panel" style="max-width:none">
+      <h1 class="rv">${esc(s.title)}</h1>
+      <div class="rule rv"></div>
+      <button class="start rv" id="start"><span class="dot"></span> ابدأ العرض مع التعليق الصوتي</button>
+      <p class="hint rv">أو مرّر للأسفل لتصفح الشرائح بصمت · الأسهم ← → للتنقل</p>
+    </div>`;
+  } else if (s.kind === "closing") {
+    inner = `<div class="panel" style="max-width:none">
+      <div class="seal rv"><svg viewBox="0 0 24 24" fill="none" stroke="#e2b45a" stroke-width="1.4"><path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <p class="dua rv">${esc(s.dua)}</p>
+      <p class="by rv">${esc(s.by).replace("عاكف بن محسن البلوشي","<strong>عاكف بن محسن البلوشي</strong>")}</p>
+    </div>`;
+  } else {
+    inner = `<div class="panel">
+      ${s.eyebrow ? `<div class="eyebrow rv">${esc(s.eyebrow)}</div>` : ""}
+      ${s.title ? `<h2 class="rv">${esc(s.title)}</h2>` : ""}
+      ${s.lead ? `<p class="lead rv">${esc(s.lead)}</p>` : ""}
+      ${s.items ? `<ul class="items ${s.compact ? "compact" : ""}">${s.items.map(t => `<li class="rv ${s.sys ? "sys" : ""}"><span class="tick"></span><span>${esc(t)}</span></li>`).join("")}</ul>` : ""}
+    </div>`;
+  }
+  sec.innerHTML = `<div class="bg"></div><div class="shade"></div><div class="grid"></div><canvas class="net"></canvas><div class="sweep"></div>
+    <div class="wrap">${inner}</div>`;
+  deck.appendChild(sec);
+  const d = document.createElement("button");
+  d.setAttribute("aria-label", "الشريحة " + AR(n)); d.dataset.n = n;
+  d.addEventListener("click", () => go(n));
+  dots.appendChild(d);
+});
+document.getElementById("tot").textContent = AR(SLIDES.length);
+
+/* stagger the reveals */
+document.querySelectorAll(".scene").forEach(sec => {
+  sec.querySelectorAll(".rv").forEach((el, i) => el.style.animationDelay = (0.25 + i * 0.32) + "s");
+});
+
+/* ---------- narration ---------- */
+const audios = SLIDES.map((_, i) => { const a = new Audio(`assets/audio/slide${i + 1}.mp3`); a.preload = "none"; return a; });
+let soundOn = false, autoOn = false, current = 1, unlocked = false;
+const soundBtn = document.getElementById("sound"), autoBtn = document.getElementById("auto");
+
+function stopAll() { audios.forEach(a => { a.pause(); a.currentTime = 0; }); }
+function playFor(n) {
+  stopAll();
+  if (!soundOn) return;
+  const a = audios[n - 1];
+  a.onended = () => { if (autoOn && current === n && n < SLIDES.length) setTimeout(() => go(n + 1), 900); };
+  a.play().catch(() => {});
+}
+function setSound(v) {
+  soundOn = v; soundBtn.setAttribute("aria-pressed", String(v));
+  if (v) playFor(current); else stopAll();
+}
+function setAuto(v) {
+  autoOn = v; autoBtn.setAttribute("aria-pressed", String(v));
+  if (v && !soundOn) setSound(true);
+  if (v && audios[current - 1].paused) playFor(current);
+}
+soundBtn.addEventListener("click", () => setSound(!soundOn));
+autoBtn.addEventListener("click", () => setAuto(!autoOn));
+
+/* ---------- navigation ---------- */
+const scenes = [...document.querySelectorAll(".scene")];
+function go(n) {
+  n = Math.max(1, Math.min(SLIDES.length, n));
+  scenes[n - 1].scrollIntoView({ behavior: "smooth", block: "start" });
+}
+document.getElementById("prev").addEventListener("click", () => go(current - 1));
+document.getElementById("next").addEventListener("click", () => go(current + 1));
+document.getElementById("full").addEventListener("click", () => {
+  const el = document.documentElement;
+  if (document.fullscreenElement) document.exitFullscreen?.();
+  else el.requestFullscreen?.().catch(() => {});
+});
+window.addEventListener("keydown", e => {
+  if (["ArrowDown", "ArrowLeft", "PageDown", " "].includes(e.key)) { e.preventDefault(); go(current + 1); }
+  else if (["ArrowUp", "ArrowRight", "PageUp"].includes(e.key)) { e.preventDefault(); go(current - 1); }
+  else if (e.key === "Home") go(1); else if (e.key === "End") go(SLIDES.length);
+  else if (e.key.toLowerCase() === "m") setSound(!soundOn);
+});
+
+function activate(n) {
+  if (n === current && scenes[n - 1].classList.contains("active")) return;
+  current = n;
+  scenes.forEach((s, i) => s.classList.toggle("active", i === n - 1));
+  dots.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-current", String(i === n - 1)));
+  document.getElementById("cur").textContent = AR(n);
+  document.getElementById("progress").style.width = (n / SLIDES.length * 100) + "%";
+  if (location.hash !== "#s" + n) history.replaceState(null, "", "#s" + n);
+  playFor(n);
+}
+const io = new IntersectionObserver(entries => {
+  entries.forEach(en => { if (en.isIntersecting && en.intersectionRatio >= 0.6) activate(+en.target.dataset.n); });
+}, { root: deck, threshold: [0.6] });
+scenes.forEach(s => s.classList.add("armed"));
+scenes.forEach(s => io.observe(s));
+
+document.getElementById("start").addEventListener("click", () => { setSound(true); setAuto(true); });
+
+/* deep link */
+const m = location.hash.match(/^#s(\d+)$/);
+if (m) setTimeout(() => go(+m[1]), 50);
+
+/* ---------- ops clock (Muscat time) ---------- */
+function tick() {
+  const t = new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Muscat", hour12: false });
+  document.getElementById("clock").textContent = t + " GST";
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------- data-link network (canvas, ambient) ---------- */
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+scenes.forEach(sec => {
+  const c = sec.querySelector("canvas.net"); const ctx = c.getContext("2d");
+  const N = sec.classList.contains("hero") ? 34 : 26;
+  let pts = [], w = 0, h = 0;
+  function size() { w = c.width = c.clientWidth * devicePixelRatio; h = c.height = c.clientHeight * devicePixelRatio;
+    pts = Array.from({ length: N }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .25 * devicePixelRatio, vy: (Math.random() - .5) * .25 * devicePixelRatio })); }
+  size(); new ResizeObserver(size).observe(c);
+  let last = 0;
+  function frame(ts) {
+    if (!sec.classList.contains("active")) { requestAnimationFrame(frame); return; }
+    if (ts - last < 33) { requestAnimationFrame(frame); return; } last = ts;
+    ctx.clearRect(0, 0, w, h);
+    const maxD = 150 * devicePixelRatio;
+    for (const p of pts) { if (!reduce) { p.x += p.vx; p.y += p.vy; } if (p.x < 0 || p.x > w) p.vx *= -1; if (p.y < 0 || p.y > h) p.vy *= -1; }
+    for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
+      const a = pts[i], b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d < maxD) { ctx.strokeStyle = `rgba(226,180,90,${(1 - d / maxD) * .28})`; ctx.lineWidth = devicePixelRatio; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+    }
+    for (const p of pts) { ctx.fillStyle = "rgba(244,246,251,.55)"; ctx.beginPath(); ctx.arc(p.x, p.y, 1.6 * devicePixelRatio, 0, Math.PI * 2); ctx.fill(); }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+});
+</script>
+<script src="assets/three.min.js"></script>
+<script src="assets/fx3d.js"></script>
+
+</body>
+</html>
